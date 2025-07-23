@@ -1116,6 +1116,9 @@ static void ggml_compute_forward_mul_mat_one_chunk(
     const struct ggml_tensor * src0 = dst->src[0];
     const struct ggml_tensor * src1 = dst->src[1];
 
+    // printf("%s src0 = [%d, %d, %d, %d]\n", src0->name, src0->ne[0],  src0->ne[1], src0->ne[2], src0->ne[3]); // 수정
+    // printf("%s src1 = [%d, %d, %d, %d]\n", src1->name, src1->ne[0],  src1->ne[1], src1->ne[2], src1->ne[3]); // 수정
+
     GGML_TENSOR_BINARY_OP_LOCALS
 
     const bool src1_cont = ggml_is_contiguous(src1);
@@ -1648,18 +1651,120 @@ static void ggml_compute_forward_mul_mat_id(
 }
 
 /////////////////////////////////
+// 수정 추가함수
+const char* ggml_op_to_string(int index) {
+    switch (index) {
+        case 0: return "GGML_OP_NONE";
+        case 1: return "GGML_OP_DUP";
+        case 2: return "GGML_OP_ADD";
+        case 3: return "GGML_OP_ADD1";
+        case 4: return "GGML_OP_ACC";
+        case 5: return "GGML_OP_SUB";
+        case 6: return "GGML_OP_MUL";
+        case 7: return "GGML_OP_DIV";
+        case 8: return "GGML_OP_SQR";
+        case 9: return "GGML_OP_SQRT";
+        case 10: return "GGML_OP_LOG";
+        case 11: return "GGML_OP_SIN";
+        case 12: return "GGML_OP_COS";
+        case 13: return "GGML_OP_SUM";
+        case 14: return "GGML_OP_SUM_ROWS";
+        case 15: return "GGML_OP_MEAN";
+        case 16: return "GGML_OP_ARGMAX";
+        case 17: return "GGML_OP_COUNT_EQUAL";
+        case 18: return "GGML_OP_REPEAT";
+        case 19: return "GGML_OP_REPEAT_BACK";
+        case 20: return "GGML_OP_CONCAT";
+        case 21: return "GGML_OP_SILU_BACK";
+        case 22: return "GGML_OP_NORM";
+        case 23: return "GGML_OP_RMS_NORM";
+        case 24: return "GGML_OP_RMS_NORM_BACK";
+        case 25: return "GGML_OP_GROUP_NORM";
+        case 26: return "GGML_OP_L2_NORM";
+        case 27: return "GGML_OP_MUL_MAT";
+        case 28: return "GGML_OP_MUL_MAT_ID";
+        case 29: return "GGML_OP_OUT_PROD";
+        case 30: return "GGML_OP_SCALE";
+        case 31: return "GGML_OP_SET";
+        case 32: return "GGML_OP_CPY";
+        case 33: return "GGML_OP_CONT";
+        case 34: return "GGML_OP_RESHAPE";
+        case 35: return "GGML_OP_VIEW";
+        case 36: return "GGML_OP_PERMUTE";
+        case 37: return "GGML_OP_TRANSPOSE";
+        case 38: return "GGML_OP_GET_ROWS";
+        case 39: return "GGML_OP_GET_ROWS_BACK";
+        case 40: return "GGML_OP_SET_ROWS";
+        case 41: return "GGML_OP_DIAG";
+        case 42: return "GGML_OP_DIAG_MASK_INF";
+        case 43: return "GGML_OP_DIAG_MASK_ZERO";
+        case 44: return "GGML_OP_SOFT_MAX";
+        case 45: return "GGML_OP_SOFT_MAX_BACK";
+        case 46: return "GGML_OP_ROPE";
+        case 47: return "GGML_OP_ROPE_BACK";
+        case 48: return "GGML_OP_CLAMP";
+        case 49: return "GGML_OP_CONV_TRANSPOSE_1D";
+        case 50: return "GGML_OP_IM2COL";
+        case 51: return "GGML_OP_IM2COL_BACK";
+        case 52: return "GGML_OP_CONV_2D";
+        case 53: return "GGML_OP_CONV_2D_DW";
+        case 54: return "GGML_OP_CONV_TRANSPOSE_2D";
+        case 55: return "GGML_OP_POOL_1D";
+        case 56: return "GGML_OP_POOL_2D";
+        case 57: return "GGML_OP_POOL_2D_BACK";
+        case 58: return "GGML_OP_UPSCALE";
+        case 59: return "GGML_OP_PAD";
+        case 60: return "GGML_OP_PAD_REFLECT_1D";
+        case 61: return "GGML_OP_ROLL";
+        case 62: return "GGML_OP_ARANGE";
+        case 63: return "GGML_OP_TIMESTEP_EMBEDDING";
+        case 64: return "GGML_OP_ARGSORT";
+        case 65: return "GGML_OP_LEAKY_RELU";
+        case 66: return "GGML_OP_FLASH_ATTN_EXT";
+        case 67: return "GGML_OP_FLASH_ATTN_BACK";
+        case 68: return "GGML_OP_SSM_CONV";
+        case 69: return "GGML_OP_SSM_SCAN";
+        case 70: return "GGML_OP_WIN_PART";
+        case 71: return "GGML_OP_WIN_UNPART";
+        case 72: return "GGML_OP_GET_REL_POS";
+        case 73: return "GGML_OP_ADD_REL_POS";
+        case 74: return "GGML_OP_RWKV_WKV6";
+        case 75: return "GGML_OP_GATED_LINEAR_ATTN";
+        case 76: return "GGML_OP_RWKV_WKV7";
+        case 77: return "GGML_OP_UNARY";
+        case 78: return "GGML_OP_MAP_CUSTOM1";
+        case 79: return "GGML_OP_MAP_CUSTOM2";
+        case 80: return "GGML_OP_MAP_CUSTOM3";
+        case 81: return "GGML_OP_CUSTOM";
+        case 82: return "GGML_OP_CROSS_ENTROPY_LOSS";
+        case 83: return "GGML_OP_CROSS_ENTROPY_LOSS_BACK";
+        case 84: return "GGML_OP_OPT_STEP_ADAMW";
+        case 85: return "GGML_OP_GLU";
+        case 86: return "GGML_OP_COUNT";
+        default: return "UNKNOWN_GGML_OP";
+    }
+}
 
 static void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor) {
     GGML_ASSERT(params);
 
+    // 수정 -> 도중에 연산을 Q8_0으로 바꾸는지 확인하는 코드
+    // if (tensor->op == 27) {
+    //     printf("%s\n", ggml_op_to_string(tensor->op));
+    //     const struct ggml_tensor * src0 = tensor->src[0];
+    //     const struct ggml_tensor * src1 = tensor->src[1];
+    //     printf("src0 type = %d, src1 type = %d\n", src0->type, src1->type);
+    // }
+  
     if (tensor->op == GGML_OP_NONE || ggml_is_empty(tensor)) {
         return;
     }
-
+   
     // extra_buffer op?
     if (ggml_cpu_extra_compute_forward(params, tensor)) {
         return;
     }
+    // printf("op = %s\n", ggml_op_to_string(tensor->op)); // 수정
 
     switch (tensor->op) {
         case GGML_OP_DUP:
@@ -1767,7 +1872,7 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
                 ggml_compute_forward_l2_norm(params, tensor);
             } break;
         case GGML_OP_MUL_MAT:
-            {
+            {   
                 ggml_compute_forward_mul_mat(params, tensor);
             } break;
         case GGML_OP_MUL_MAT_ID:
@@ -2842,8 +2947,15 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
 
     for (int node_n = 0; node_n < cgraph->n_nodes && atomic_load_explicit(&tp->abort, memory_order_relaxed) != node_n; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
-
+        
+        // double start_time = omp_get_wtime(); //수정
         ggml_compute_forward(&params, node);
+        // double end_time = omp_get_wtime(); // 수정
+
+        // printf("node name = %s\n", node->name); // 수정
+        // printf("node op = %s\n", ggml_op_to_string(node->op)); // 수정
+        // printf("node shape = [%d, %d, %d, %d]\n", node->ne[0], node->ne[1], node->ne[2], node->ne[3]); // 수정
+        // printf("computation time = %fms\n\n", (end_time - start_time) * 1000); // 수정
 
         if (state->ith == 0 && cplan->abort_callback &&
                 cplan->abort_callback(cplan->abort_callback_data)) {

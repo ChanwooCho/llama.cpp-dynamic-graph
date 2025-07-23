@@ -3323,8 +3323,8 @@ bool llamafile_sgemm(const struct ggml_compute_params * params, int64_t m, int64
 
     // only enable sgemm for prompt processing
 #if !defined(__MMA__)
-    if (n < 2)
-        return false;
+    // if (n < 2)
+    //     return false;
 #endif
 
     if (Ctype != GGML_TYPE_F32)

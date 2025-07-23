@@ -25,6 +25,9 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <cstdlib> // 수정 추가
+#include <ctime> // 수정 추가
+
 const char * llm_type_name(llm_type type) {
     switch (type) {
         case LLM_TYPE_14M:           return "14M";
@@ -5353,7 +5356,7 @@ struct llm_build_llama : public llm_graph_context {
 
         for (int il = 0; il < n_layer; ++il) {
             ggml_tensor * inpSA = inpL;
-
+            
             // norm
             cur = build_norm(inpL,
                     model.layers[il].attn_norm, NULL,
@@ -5364,6 +5367,30 @@ struct llm_build_llama : public llm_graph_context {
             {
                 // rope freq factors for llama3; may return nullptr for llama2 and other models
                 ggml_tensor * rope_factors = model.get_rope_factors(cparams, il);
+                
+                // 수정 (과연 dynamic하게 수정할 수 있는가) /////////////////////////////////////////////////////
+                int random_num = std::rand() % 2; 
+                if (il == n_layer - 1 && random_num == 0) {
+                    ggml_tensor * q8_tensor = ggml_new_tensor_4d(ctx0, \
+                        GGML_TYPE_Q8_0, \
+                        model.layers[il].ffn_down->ne[0],  \
+                        model.layers[il].ffn_down->ne[1],  \
+                        model.layers[il].ffn_down->ne[2],  \
+                        model.layers[il].ffn_down->ne[3]);
+
+                    FILE * fp = fopen("/data/data/com.termux/files/home/chanwoo/models/last_layer_ffn_down.data", "rb");
+                    size_t memory_size = fread(q8_tensor->data, 1, ggml_nbytes(q8_tensor), fp);
+                    fclose(fp);
+                
+                    model.layers[il].ffn_down->type = q8_tensor->type;
+                    model.layers[il].ffn_down->buffer = q8_tensor->buffer;
+                    model.layers[il].ffn_down->nb[0] = q8_tensor->nb[0];
+                    model.layers[il].ffn_down->nb[1] = q8_tensor->nb[1];
+                    model.layers[il].ffn_down->nb[2] = q8_tensor->nb[2];
+                    model.layers[il].ffn_down->nb[3] = q8_tensor->nb[3];
+                    model.layers[il].ffn_down->data = q8_tensor->data;
+                    /////////////////////////////////////////////////////////////////////////////////////////////
+                }
 
                 // compute Q and K and RoPE them
                 ggml_tensor * Qcur = build_lora_mm(model.layers[il].wq, cur);

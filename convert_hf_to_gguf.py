@@ -196,17 +196,17 @@ class ModelBase:
                     yield name, data
 
         # verify tensor name presence and identify potentially missing files
-        if len(tensor_names_from_parts.symmetric_difference(self.tensor_names)) > 0:
-            missing = sorted(self.tensor_names.difference(tensor_names_from_parts))
-            extra = sorted(tensor_names_from_parts.difference(self.tensor_names))
-            missing_files = sorted(set(weight_map[n] for n in missing if n in weight_map))
-            if len(extra) == 0 and len(missing_files) > 0:
-                raise ValueError(f"Missing or incomplete model files: {missing_files}\n"
-                                 f"Missing tensors: {missing}")
-            else:
-                raise ValueError("Mismatch between weight map and model parts for tensor names:\n"
-                                 f"Missing tensors: {missing}\n"
-                                 f"Extra tensors: {extra}")
+        # if len(tensor_names_from_parts.symmetric_difference(self.tensor_names)) > 0:
+        #     missing = sorted(self.tensor_names.difference(tensor_names_from_parts))
+        #     extra = sorted(tensor_names_from_parts.difference(self.tensor_names))
+        #     missing_files = sorted(set(weight_map[n] for n in missing if n in weight_map))
+        #     if len(extra) == 0 and len(missing_files) > 0:
+        #         raise ValueError(f"Missing or incomplete model files: {missing_files}\n"
+        #                          f"Missing tensors: {missing}")
+        #     else:
+        #         raise ValueError("Mismatch between weight map and model parts for tensor names:\n"
+        #                          f"Missing tensors: {missing}\n"
+        #                          f"Extra tensors: {extra}") // 수정
 
     def format_tensor_name(self, key: gguf.MODEL_TENSOR, bid: int | None = None, suffix: str = ".weight") -> str:
         if key not in gguf.MODEL_TENSORS[self.model_arch]:
