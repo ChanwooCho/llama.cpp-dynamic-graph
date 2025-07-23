@@ -5370,7 +5370,7 @@ struct llm_build_llama : public llm_graph_context {
                 
                 // 수정 (과연 dynamic하게 수정할 수 있는가) /////////////////////////////////////////////////////
                 int random_num = std::rand() % 2; 
-                if (il == n_layer - 1 && random_num == 0) {
+                if (il == n_layer - 1) {
                     ggml_tensor * q8_tensor = ggml_new_tensor_4d(ctx0, \
                         GGML_TYPE_Q8_0, \
                         model.layers[il].ffn_down->ne[0],  \
